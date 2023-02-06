@@ -1,0 +1,9 @@
+syntax = "proto3";
+package tutorial;
+
+option go_package = "boom.tutorialpb";
+
+
+message House {
+    optional string address = 1;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package tutorial;
+
+option go_package = "boom.tutorialpb";
+
+
+message Person {
+    optional string name = 1;
+    optional int32 id = 2;
+    string email = 3;
+    optional string optionalEmail = 4;
+}
