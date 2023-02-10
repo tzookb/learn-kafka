@@ -9,3 +9,6 @@
 *.tfvars
 
 .env
+.idea/
+.vscode/
+.out/

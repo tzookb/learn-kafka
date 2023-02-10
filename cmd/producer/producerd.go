@@ -6,19 +6,11 @@ import (
 	"fmt"
 	kafkawrap "kafkaplay/kafkawrap"
 	"os"
+	"sync"
+	"time"
 
 	boom_tutorialpb "kafkaplay/out/boom.tutorialpb"
-
-	kafka "github.com/segmentio/kafka-go"
 )
-
-func newKafkaWriter(kafkaURL, topic string) *kafka.Writer {
-	return &kafka.Writer{
-		Addr:     kafka.TCP(kafkaURL),
-		Topic:    topic,
-		Balancer: &kafka.LeastBytes{},
-	}
-}
 
 func anyToPointer[k interface{}](s k) *k {
 	return &s
@@ -29,17 +21,33 @@ func main() {
 	topic := os.Getenv("topic")
 
 	fmt.Println("producing topic: ", topic, " on", kafkaURL)
+	kafkaWriter := kafkawrap.NewKafkaWriter(kafkaURL, topic)
+	defer kafkaWriter.Close()
 
-	writer := newKafkaWriter(kafkaURL, topic)
-	defer writer.Close()
-	fmt.Println("start producing ... !!")
+	var wg sync.WaitGroup
+	wg.Add(2)
 
+	start := time.Now()
 	p := &boom_tutorialpb.Person{
-		Email:         "tzookb@gmail.com",
+		Email:         "newemail@gmail.com",
 		OptionalEmail: anyToPointer("zzz"),
 		Name:          anyToPointer("tzook"),
 		Id:            anyToPointer(int32(32)),
 	}
 
-	kafkawrap.Write(writer, p)
+	fmt.Println("before write")
+	go func() {
+		kafkaWriter.Write(p)
+		fmt.Println("after write", time.Since(start))
+		wg.Done()
+	}()
+
+	time.Sleep(time.Second * 2)
+	go func() {
+		kafkaWriter.Write(p)
+		fmt.Println("after write", time.Since(start))
+		wg.Done()
+	}()
+
+	wg.Wait()
 }
