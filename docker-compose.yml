@@ -13,30 +13,31 @@ services:
   kafka1:
     image: docker.io/bitnami/kafka:3.3
     ports:
-      - "9092:9092"
+      - "9091:9092"
     volumes:
       - "kafka_data:/bitnami"
     environment:
-      # - KAFKA_BROKER_ID=1
+      - KAFKA_BROKER_ID=1
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_ADVERTISED_LISTENERS=${KAFKA_HOST}
+      # - KAFKA_ADVERTISED_LISTENERS=${KAFKA_HOST}
       # - KAFKA_CFG_LISTENERS=EXTERNAL://0.0.0.0:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092
     depends_on:
       - zookeeper
-  # kafka2:
-  #   image: docker.io/bitnami/kafka:3.3
-  #   ports:
-  #     - "9091:9092"
-  #   volumes:
-  #     - "kafka_data2:/bitnami"
-  #   environment:
-  #     - KAFKA_BROKER_ID=1
-  #     - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-  #     - ALLOW_PLAINTEXT_LISTENER=yes
-  #     - KAFKA_ADVERTISED_LISTENERS=${KAFKA_HOST}
-  #   depends_on:
-  #     - zookeeper
+  kafka2:
+    image: docker.io/bitnami/kafka:3.3
+    ports:
+      - "9092:9092"
+    volumes:
+      - "kafka_data2:/bitnami"
+    environment:
+      - KAFKA_BROKER_ID=2
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9092
+    depends_on:
+      - zookeeper
   kowl:
     image: vectorized/console:latest
     ports:
@@ -44,7 +45,7 @@ services:
     volumes:
       - "kafka_data:/bitnami"
     environment:
-      - KAFKA_BROKERS=kafka1:9092
+      - KAFKA_BROKERS=kafka1,kafka2
 
   # schemareg:
   #   image: docker.io/bitnami/schema-registry:7.2.3
@@ -56,14 +57,16 @@ services:
   #     - SCHEMA_REGISTRY_DEBUG=true
   #     - SCHEMA_REGISTRY_KAFKA_BROKERS=${KAFKA_HOST}
 
-  # go:
-  #   image: golang:alpine
-  #   tty: true
-  #   volumes:
-  #     - "./:/golang"
+  go:
+    image: golang:alpine
+    tty: true
+    volumes:
+      - "./:/golang"
 
 volumes:
   zookeeper_data:
     driver: local
   kafka_data:
+    driver: local
+  kafka_data2:
     driver: local

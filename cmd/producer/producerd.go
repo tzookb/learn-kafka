@@ -25,29 +25,26 @@ func main() {
 	defer kafkaWriter.Close()
 
 	var wg sync.WaitGroup
-	wg.Add(2)
 
 	start := time.Now()
 	p := &boom_tutorialpb.Person{
-		Email:         "newemail@gmail.com",
+		Email:         "another@gmail.com",
 		OptionalEmail: anyToPointer("zzz"),
 		Name:          anyToPointer("tzook"),
 		Id:            anyToPointer(int32(32)),
 	}
 
 	fmt.Println("before write")
-	go func() {
-		kafkaWriter.Write(p)
-		fmt.Println("after write", time.Since(start))
-		wg.Done()
-	}()
-
-	time.Sleep(time.Second * 2)
-	go func() {
-		kafkaWriter.Write(p)
-		fmt.Println("after write", time.Since(start))
-		wg.Done()
-	}()
-
+	i := 0
+	for i < 10 {
+		go func() {
+			kafkaWriter.Write(p)
+			// fmt.Println("after write", time.Since(start))
+			wg.Done()
+		}()
+		wg.Add(1)
+		i++
+	}
 	wg.Wait()
+	fmt.Println("after final write", time.Since(start))
 }

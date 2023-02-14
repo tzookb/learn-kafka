@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
 	"google.golang.org/protobuf/proto"
 )
@@ -19,7 +20,7 @@ func (k *KafkaWriter) Close() {
 
 func NewKafkaWriter(kafkaURL, topic string) KafkaWriter {
 	writer := kafka.Writer{
-		BatchSize:              2,
+		BatchSize:              1,
 		BatchTimeout:           time.Second * 10,
 		AllowAutoTopicCreation: true,
 		// WriteBackoffMin: 0,
@@ -27,9 +28,8 @@ func NewKafkaWriter(kafkaURL, topic string) KafkaWriter {
 		// WriteTimeout: 0,
 		// ReadTimeout: time.Second,
 		// WriteBackoffMax: time.Second * 2,
-		Addr:     kafka.TCP(kafkaURL),
-		Topic:    topic,
-		Balancer: &kafka.LeastBytes{},
+		Addr:  kafka.TCP(kafkaURL),
+		Topic: topic,
 	}
 	consumer := KafkaWriter{
 		kafka: &writer,
@@ -43,15 +43,15 @@ func (k *KafkaWriter) Write(protoMsg proto.Message) {
 		fmt.Println("Failed to encode address book:", err)
 	}
 
-	// randKey := []byte(fmt.Sprint(uuid.New()))
+	randKey := []byte(fmt.Sprint(uuid.New()))
 	msg := kafka.Message{
-		// Key:   randKey,
+		Key:   randKey,
 		Value: out,
 	}
 	writeErr := k.kafka.WriteMessages(context.Background(), msg)
 	if writeErr != nil {
 		fmt.Println("error here", writeErr)
 	} else {
-		fmt.Println("produced event")
+		// fmt.Println("produced event")
 	}
 }
