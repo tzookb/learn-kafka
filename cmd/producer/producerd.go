@@ -36,7 +36,7 @@ func main() {
 
 	fmt.Println("before write")
 	i := 0
-	for i < 10 {
+	for i < 1 {
 		go func() {
 			kafkaWriter.Write(p)
 			// fmt.Println("after write", time.Since(start))

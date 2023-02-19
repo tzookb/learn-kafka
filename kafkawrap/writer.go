@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
 	"google.golang.org/protobuf/proto"
 )
 
 type KafkaWriter struct {
 	kafka *kafka.Writer
+	pos   int
 }
 
 func (k *KafkaWriter) Close() {
@@ -43,7 +43,11 @@ func (k *KafkaWriter) Write(protoMsg proto.Message) {
 		fmt.Println("Failed to encode address book:", err)
 	}
 
-	randKey := []byte(fmt.Sprint(uuid.New()))
+	keys := []string{"one", "two", "three"}
+	randKey := []byte(keys[k.pos])
+	k.pos++
+	k.pos = k.pos % 3
+
 	msg := kafka.Message{
 		Key:   randKey,
 		Value: out,
