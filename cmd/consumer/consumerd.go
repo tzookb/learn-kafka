@@ -7,12 +7,20 @@ import (
 	boom_tutorialpb "kafkaplay/out/boom.tutorialpb"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 )
 
 func main() {
 	kafkaURL := os.Getenv("kafkaURL")
 	topic := os.Getenv("topic")
+	readAmountStr := os.Getenv("readAmount")
+
+	readAmount, err := strconv.Atoi(readAmountStr)
+	if err != nil {
+		readAmount = 1
+	}
+
 	ctx := context.Background()
 
 	kafkaReader := kafkawrap.NewKafkaReader(kafkaURL, topic)
@@ -24,12 +32,13 @@ func main() {
 	})
 	p := &boom_tutorialpb.Person{}
 	p.Email = "xx"
-	fmt.Println("before", p)
-	fmt.Printf("t1: %T\n", p)
-	kafkaReader.ReadMessage(ctx, p)
-	fmt.Println("after", p)
-	fmt.Println("after specific", p.Email)
-
+	fmt.Println("before reading: ", readAmount)
+	for readAmount > 0 {
+		kafkaReader.ReadMessage(ctx, p)
+		fmt.Println("read: ", p)
+		readAmount -= 1
+	}
+	fmt.Println("after reading")
 }
 
 func SetupCloseHandler(f func()) {

@@ -18,7 +18,7 @@ func (k *KafkaConsumer) ReadMessage(ctx context.Context, object protoreflect.Pro
 	if err != nil {
 		fmt.Println("error here", err)
 	} else {
-		fmt.Println("consumed", msg.Offset, msg.Topic, string(msg.Value))
+		fmt.Println("consumed data: ", msg.Offset, msg.Topic, msg.Partition, string(msg.Value))
 	}
 
 	if err := proto.Unmarshal([]byte(msg.Value), object); err != nil {
@@ -34,12 +34,11 @@ func (k *KafkaConsumer) Close() {
 func NewKafkaReader(kafkaURL, topic string) KafkaConsumer {
 	kafka.TCP(kafkaURL)
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		GroupID:   "9",
-		Brokers:   []string{kafkaURL},
-		Topic:     topic,
-		Partition: 0,
-		MinBytes:  10e3, // 10KB
-		MaxBytes:  10e6, // 10MB
+		// GroupID:  "9",
+		Brokers:  []string{kafkaURL},
+		Topic:    topic,
+		MinBytes: 10e3, // 10KB
+		MaxBytes: 10e6, // 10MB
 	})
 	consumer := KafkaConsumer{
 		kafka: reader,

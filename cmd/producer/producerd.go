@@ -6,6 +6,7 @@ import (
 	"fmt"
 	kafkawrap "kafkaplay/kafkawrap"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -36,12 +37,11 @@ func main() {
 
 	fmt.Println("before write")
 	i := 0
-	for i < 1 {
-		go func() {
-			kafkaWriter.Write(p)
-			// fmt.Println("after write", time.Since(start))
+	for i < 100 {
+		go func(key int) {
+			kafkaWriter.Write(p, strconv.Itoa(key))
 			wg.Done()
-		}()
+		}(i)
 		wg.Add(1)
 		i++
 	}
