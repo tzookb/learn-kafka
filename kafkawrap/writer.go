@@ -21,8 +21,9 @@ func (k *KafkaWriter) Close() {
 func NewKafkaWriter(kafkaURL, topic string) KafkaWriter {
 	balancer := kafka.CRC32Balancer{}
 	writer := kafka.Writer{
-		BatchSize:              1,
-		BatchTimeout:           time.Second * 10,
+		BatchSize:              10,
+		Async:                  true,
+		BatchTimeout:           time.Second * 5,
 		AllowAutoTopicCreation: true,
 		// WriteBackoffMin: 0,
 		// BatchTimeout: 0,

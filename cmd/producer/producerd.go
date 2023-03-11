@@ -28,6 +28,7 @@ func main() {
 	var wg sync.WaitGroup
 
 	start := time.Now()
+
 	p := &boom_tutorialpb.Person{
 		Email:         "another@gmail.com",
 		OptionalEmail: anyToPointer("zzz"),
@@ -37,7 +38,7 @@ func main() {
 
 	fmt.Println("before write")
 	i := 0
-	for i < 100 {
+	for i < 11 {
 		go func(key int) {
 			kafkaWriter.Write(p, strconv.Itoa(key))
 			wg.Done()
